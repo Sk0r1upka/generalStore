@@ -20,7 +20,7 @@ public class OnboardingTest {
             verifyAppLaunch();
             findAndVerifyElements();
             //performUserActions();
-            viewProductlist();
+            verifyProductListVisible();
         } catch (Exception e) {
             System.err.println("Test failed with exception: " + e.getMessage());
             e.printStackTrace();
@@ -107,9 +107,10 @@ private static void verifyAppLaunch() {
             verifyRadioButton(femaleRadio, "Female", false);
             verifyInputField(nameInput);
             verifyButton(shopButton, "Let's  Shop");
+            shopButton.click();
         } catch (Exception e) {
-            System.err.println("✗ Error finding elements: " + e.getMessage());
-            throw new RuntimeException("Element verification failed", e);
+            System.err.println("✗ Error during form filling or transition: " + e.getMessage());
+            throw new RuntimeException("Form interaction failed", e);
         }
     }
     private static void verifyInputField(WebElement input) {
@@ -194,8 +195,13 @@ private static void verifyAppLaunch() {
             System.err.println("✗ Button is not displayed.");
         }
     }
+    private static void verifyProductListVisible() {
+        By productListBy = By.id("com.androidsample.generalstore:id/rvProductList");
+        WebElement productList = wait.until(
+                ExpectedConditions.visibilityOfElementLocated(productListBy));
+        viewProductlist(productList, true, true);
+    }
     private static void viewProductlist(WebElement element, boolean expectedResultDisplayed, boolean expectedResultEnabled){
-        WebElement productlist = driver.findElement(By.id("com.androidsample.generalstore:id/rvProductList"));
         if (element != null && element.isDisplayed()) {
             boolean actualResultDisplayed = element.isDisplayed();
             boolean actualResultEnabled = element.isEnabled();
@@ -206,9 +212,9 @@ private static void verifyAppLaunch() {
             if (!actualResultEnabled) {
                 System.err.println("! Warning: " + element + " is not enabled for interaction.");
             }
-            else {
-                System.err.println("something went wrong");
-            }
+        }
+        else {
+            System.err.println("something went wrong");
         }
     }
     private static void verifyElementState(WebElement element, String elementName) {
