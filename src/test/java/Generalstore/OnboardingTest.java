@@ -20,6 +20,7 @@ public class OnboardingTest {
             verifyAppLaunch();
             findAndVerifyElements();
             //performUserActions();
+            viewProductlist();
         } catch (Exception e) {
             System.err.println("Test failed with exception: " + e.getMessage());
             e.printStackTrace();
@@ -72,7 +73,7 @@ private static void verifyAppLaunch() {
     }
 
     try {
-        WebElement splashScreen = driver.findElement(By.id("com.androidsample.generalstore:id/splashscreen"));
+        WebElement splashScreen = wait.until(ExpectedConditions.presenceOfElementLocated(By.id("com.androidsample.generalstore:id/splashscreen")));
         verifyElementState(splashScreen, "Splash screen");
     } catch (Exception e) {
         System.err.println("✗ Splash screen element not found (may have disappeared): " + e.getMessage());
@@ -93,6 +94,7 @@ private static void verifyAppLaunch() {
             WebElement femaleRadio = driver.findElement(By.id("com.androidsample.generalstore:id/radioFemale"));
             WebElement nameInput = driver.findElement(By.id("com.androidsample.generalstore:id/nameField"));
             WebElement shopButton = driver.findElement(By.id("com.androidsample.generalstore:id/btnLetsShop"));
+
 
             verifyTitle(title);
             verifyText(selectCountryText, "Select the country where you want to shop");
@@ -190,6 +192,23 @@ private static void verifyAppLaunch() {
             }
         } else {
             System.err.println("✗ Button is not displayed.");
+        }
+    }
+    private static void viewProductlist(WebElement element, boolean expectedResultDisplayed, boolean expectedResultEnabled){
+        WebElement productlist = driver.findElement(By.id("com.androidsample.generalstore:id/rvProductList"));
+        if (element != null && element.isDisplayed()) {
+            boolean actualResultDisplayed = element.isDisplayed();
+            boolean actualResultEnabled = element.isEnabled();
+            System.out.println("product list is displayed");
+            if (!actualResultDisplayed){
+                System.out.println("product list not found.");
+            }
+            if (!actualResultEnabled) {
+                System.err.println("! Warning: " + element + " is not enabled for interaction.");
+            }
+            else {
+                System.err.println("something went wrong");
+            }
         }
     }
     private static void verifyElementState(WebElement element, String elementName) {
