@@ -41,27 +41,43 @@ public class OnboardingTest {
         driver = new AndroidDriver(new URL("http://localhost:4723/wd/hub"), capabilities);
         wait = new WebDriverWait(driver, Duration.ofSeconds(10));
     }
-    private static void verifyAppLaunch() {
-        String currentPackage = driver.getCurrentPackage();
-        if (currentPackage.equals("com.androidsample.generalstore")) {
-            System.out.println("Application has loaded successfully and the package is avaliable");
-        } else {
-            System.err.println("✗ Application failed to launch. Current package: " + currentPackage);
-            throw new RuntimeException("App launch verification failed");
-        }
-        try {
-            WebElement bucket = driver.findElement(By.id("com.androidsample.generalstore:id/splashscreen"));
-            if (bucket.isDisplayed()) {
-                System.out.println("✓ Splash screen element found and is displayed");
-            }
-            else {
-                System.out.println("! Splash screen element found but is not displayed");
-            }
-        }
-        catch (Exception e) {
-            System.out.println("! Splash screen element not found (may have disappeared)");
-        }
+//    private static void verifyAppLaunch() {
+//        String currentPackage = driver.getCurrentPackage();
+//        if (currentPackage.equals("com.androidsample.generalstore")) {
+//            System.out.println("Application has loaded successfully and the package is avaliable");
+//        } else {
+//            System.err.println("✗ Application failed to launch. Current package: " + currentPackage);
+//            throw new RuntimeException("App launch verification failed");
+//        }
+//        try {
+//            WebElement bucket = driver.findElement(By.id("com.androidsample.generalstore:id/splashscreen"));
+//            if (bucket.isDisplayed()) {
+//                System.out.println("✓ Splash screen element found and is displayed");
+//            }
+//            else {
+//                System.out.println("! Splash screen element found but is not displayed");
+//            }
+//        }
+//        catch (Exception e) {
+//            System.out.println("! Splash screen element not found (may have disappeared)");
+//        }
+//    }
+private static void verifyAppLaunch() {
+    String currentPackage = driver.getCurrentPackage();
+    if (currentPackage.equals("com.androidsample.generalstore")) {
+        System.out.println("✓ Application has loaded successfully and the package is available");
+    } else {
+        System.err.println("✗ Application failed to launch. Current package: " + currentPackage);
+        throw new RuntimeException("App launch verification failed");
     }
+
+    try {
+        WebElement splashScreen = driver.findElement(By.id("com.androidsample.generalstore:id/splashscreen"));
+        verifyElementState(splashScreen, "Splash screen");
+    } catch (Exception e) {
+        System.err.println("✗ Splash screen element not found (may have disappeared): " + e.getMessage());
+    }
+}
     private static void findAndVerifyElements() {
         try {
             WebElement title = wait.until(ExpectedConditions.visibilityOfElementLocated(
@@ -94,11 +110,103 @@ public class OnboardingTest {
             throw new RuntimeException("Element verification failed", e);
         }
     }
+    private static void verifyInputField(WebElement input) {
+        String testName = "Test";
+        verifyElementState(input, "Name input field");
+        try {
+            input.clear();
+            input.sendKeys(testName);
+            String enteredText = input.getText();
+            if (enteredText.equals(testName)) {
+                System.out.println("✓ Input field accepted text correctly: " + enteredText);
+            } else {
+                System.err.println("✗ Input field text mismatch. Expected: " + testName + ", Found: " + enteredText);
+            }
+        } catch (Exception e) {
+            System.err.println("✗ Failed to interact with name input field: " + e.getMessage());
+        }
+    }
     private static void verifyTitle(WebElement element) {
         if (element != null && element.isDisplayed()) {
             System.out.println("✓ Title is displayed: " + element.getText());
         } else {
             System.err.println("✗ Title is not displayed.");
+        }
+    }
+    private static void verifyText(WebElement element, String expectedText) {
+        if (element != null && element.isDisplayed()) {
+            String actualText = element.getText();
+            if (actualText.equals(expectedText)) {
+                System.out.println("✓ Text matches: " + actualText);
+            } else {
+                System.err.println("✗ Text does not match. Expected: " + expectedText + ", Found: " + actualText);
+            }
+        } else {
+            System.err.println("✗ Element with text '" + expectedText + "' is not displayed.");
+        }
+    }
+    private static void verifyCountrySpinner(WebElement element) {
+        if (element != null && element.isDisplayed()) {
+            System.out.println("✓ Country spinner is displayed with value: " + element.getText());
+        } else {
+            System.err.println("✗ Country spinner not displayed.");
+        }
+    }
+    private static void verifyImageElement(WebElement element) {
+        if (element != null && element.isDisplayed()) {
+            System.out.println("✓ Image element is displayed.");
+        } else {
+            System.err.println("✗ Image element is not displayed.");
+        }
+    }
+    private static void verifySpinnerElement(WebElement element) {
+        if (element != null && element.isDisplayed()) {
+            System.out.println("✓ Spinner element is displayed.");
+        } else {
+            System.err.println("✗ Spinner element is not displayed.");
+        }
+    }
+    private static void verifyRadioButton(WebElement element, String label, boolean shouldBeChecked) {
+        if (element != null && element.isDisplayed()) {
+            String checkedAttr = element.getAttribute("checked");
+            boolean isChecked = "true".equalsIgnoreCase(checkedAttr);
+
+            if (isChecked == shouldBeChecked) {
+                System.out.println("✓ Radio button '" + label + "' is correctly " + (isChecked ? "checked" : "not checked"));
+            } else {
+                System.err.println("✗ Radio button '" + label + "' checked state mismatch. Expected: " + shouldBeChecked + ", Actual: " + isChecked);
+            }
+        } else {
+            System.err.println("✗ Radio button '" + label + "' is not displayed.");
+        }
+    }
+    private static void verifyButton(WebElement element, String expectedText) {
+        if (element != null && element.isDisplayed()) {
+            String actualText = element.getText();
+            if (actualText.equals(expectedText)) {
+                System.out.println("✓ Button text matches: " + actualText);
+            } else {
+                System.err.println("✗ Button text mismatch. Expected: '" + expectedText + "', but found: '" + actualText + "'");
+            }
+        } else {
+            System.err.println("✗ Button is not displayed.");
+        }
+    }
+    private static void verifyElementState(WebElement element, String elementName) {
+        if (element != null) {
+            boolean isDisplayed = element.isDisplayed();
+            boolean isEnabled = element.isEnabled();
+            System.out.printf("✓ %s found: Displayed = %s, Enabled = %s%n", elementName, isDisplayed, isEnabled);
+
+            if (!isDisplayed) {
+                System.err.println("! Warning: " + elementName + " is not displayed on screen.");
+            }
+
+            if (!isEnabled) {
+                System.err.println("! Warning: " + elementName + " is not enabled for interaction.");
+            }
+        } else {
+            System.err.println("✗ " + elementName + " is null.");
         }
     }
 }
