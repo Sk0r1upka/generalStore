@@ -1,6 +1,7 @@
 package Generalstore;
 
 import io.appium.java_client.android.AndroidDriver;
+import io.appium.java_client.appmanagement.ApplicationState;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.DesiredCapabilities;
@@ -11,7 +12,8 @@ import java.net.URL;
 import java.time.Duration;
 
 public class OnboardingTest {
-
+    private static final String APK_PATH = "C:\\Users\\savch\\IdeaProjects\\untitled\\src\\test\\java\\Generalstore\\General-Store.apk";
+    private static final String APP_PACKAGE = "com.androidsample.generalstore";
     private static AndroidDriver driver;
     private static WebDriverWait wait;
     public static void main(String[] args) {
@@ -25,9 +27,7 @@ public class OnboardingTest {
             System.err.println("Test failed with exception: " + e.getMessage());
             e.printStackTrace();
         } finally {
-            if (driver != null) {
-                driver.quit();
-            }
+            cleanup();
         }
     }
     private static void setupDriver()throws Exception{
@@ -35,12 +35,32 @@ public class OnboardingTest {
         DesiredCapabilities capabilities = new DesiredCapabilities();
         capabilities.setCapability("appium:deviceName", "emulator-5554");
         capabilities.setCapability("platformName", "Android");
-        capabilities.setCapability("appium:appPackage", "com.androidsample.generalstore");
+        capabilities.setCapability("appium:app", APK_PATH);
+        capabilities.setCapability("appium:appPackage", APP_PACKAGE);
         capabilities.setCapability("appium:appActivity", ".SplashActivity");
         capabilities.setCapability("appium:automationName", "UIAutomator2");
         //встановлення драйверу
         driver = new AndroidDriver(new URL("http://localhost:4723/wd/hub"), capabilities);
         wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+    }
+    private static void cleanup() {
+        if (driver == null) return;
+        try {
+            driver.terminateApp(APP_PACKAGE);
+            if (driver.queryAppState(APP_PACKAGE) != ApplicationState.NOT_RUNNING) {
+                System.out.println("......…");
+                Thread.sleep(1000);
+            }
+            boolean removed = driver.removeApp(APP_PACKAGE);
+            System.out.println(removed
+                    ? "✓ " + APP_PACKAGE + " remove."
+                    : "✗ Not " + APP_PACKAGE);
+        } catch (Exception e) {
+            System.err.println("✗ Error: " + e.getMessage());
+        } finally {
+            driver.quit();
+            System.out.println("✓ Succ");
+        }
     }
 //    private static void verifyAppLaunch() {
 //        String currentPackage = driver.getCurrentPackage();
